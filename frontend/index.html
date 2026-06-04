@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Food Menyu</title>
+    <style>
+        /* CSS Dizayn qismi */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #fcf8f2;
+            color: #333;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(255, 71, 87, 0.2);
+        }
+
+        header h1 {
+            font-size: 2.7rem;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        #loader {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff4757;
+            margin-top: 50px;
+        }
+
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .food-card {
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #f1f2f6;
+        }
+
+        .food-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .food-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #f1f2f6;
+        }
+
+        .food-info {
+            padding: 20px;
+            position: relative;
+        }
+
+        .food-type {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #ffa502;
+            font-weight: bold;
+            margin-bottom: 6px;
+            background-color: #fffaf0;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .food-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2f3542;
+            margin-bottom: 12px;
+        }
+
+        .food-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .food-price {
+            font-size: 1.3rem;
+            color: #2ed573;
+            font-weight: bold;
+        }
+
+        .order-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .order-btn:hover {
+            background-color: #e84118;
+        }
+
+        .error-message {
+            color: #ff4757;
+            text-align: center;
+            font-size: 1.2rem;
+            grid-column: 1 / -1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Yummy Fast Food</h1>
+        <p>Sizning FastAPI serveringizdan real vaqtda kelayotgan taomlar menyusi</p>
+    </header>
+
+    <div id="loader">Mazali menyu yuklanmoqda...</div>
+
+    <div class="menu-container" id="menu-grid"></div>
+
+    <script>
+        // JAVASCRIPT - API bilan bog'lanish qismi
+        // Siz bergan Render havolasiga /fastfood endpointini uladik
+        const API_URL = "https://asedfg.onrender.com/fastfood"; 
+
+        const menuGrid = document.getElementById('menu-grid');
+        const loader = document.getElementById('loader');
+
+        async function fetchMenu() {
+            try {
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error("Serverdan ma'lumot olishda xatolik yuz berdi.");
+                }
+
+                const result = await response.json();
+                loader.style.display = 'none'; // Yuklanmoqda yozuvini yashirish
+
+                if (result.status === "success" && result.data) {
+                    displayMenu(result.data);
+                } else {
+                    menuGrid.innerHTML = `<p class="error-message">Kutilmagan ma'lumot formati keldi.</p>`;
+                }
+
+            } catch (error) {
+                console.error("Xatolik:", error);
+                loader.style.display = 'none';
+                menuGrid.innerHTML = `
+                    <p class="error-message">
+                        Xatolik yuz berdi! Serveringiz hozirgina "uxlab qolgan" bo'lishi mumkin.<br>
+                        Sahifani 30 soniyadan keyin qayta yangilab (Refresh) ko'ring.<br>
+                        <small style="color: gray; font-size: 0.9rem;">(Havola: ${API_URL})</small>
+                    </p>`;
+            }
+        }
+
+        // Ma'lumotlarni HTML-ga chiroyli kartalar ko'rinishida chiqarish
+        function displayMenu(foods) {
+            menuGrid.innerHTML = ""; 
+
+            foods.forEach(food => {
+                const foodCard = `
+                    <div class="food-card">
+                        <img src="${food.rasmi}" alt="${food.nomi}" class="food-image">
+                        <div class="food-info">
+                            <div class="food-type">${food.turi}</div>
+                            <div class="food-name">${food.nomi}</div>
+                            <div class="food-footer">
+                                <div class="food-price">${food.narxi}</div>
+                                <button class="order-btn" onclick="alert('${food.nomi} savatchaga qo\\'shildi!')">Qo'shish</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                menuGrid.insertAdjacentHTML('beforeend', foodCard);
+            });
+        }
+
+        // Sahifa yuklanishi bilan API-ga so'rov yuboramiz
+        fetchMenu();
+    </script>
+</body>
+</html>
