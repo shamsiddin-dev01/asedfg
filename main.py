@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Fast Food API", description="10 ta mazali taom haqida ma'lumot beruvchi API")
 
+# Brauzerda frontend bilan muammosiz ulanishi uchun CORS sozlamasi
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,6 +37,7 @@ def get_menu():
     """Barcha 10 ta fast food taomlarini qaytaruvchi GET methodi"""
     return {"status": "success", "data": fast_food_menyu}
 
+# Render platformasida port xatosi bermasligi uchun asosiy blok
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("main:app", host="0.0.0.0", port=port)
